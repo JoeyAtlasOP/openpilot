@@ -98,10 +98,10 @@ def auto_strategy(rlog_paths: LogPaths, qlog_paths: LogPaths, interactive: bool,
   missing_rlogs = [rlog is None or not valid_file(rlog) for rlog in rlog_paths].count(True)
   if missing_rlogs != 0:
     if interactive:
-      if input(f"{missing_rlogs} rlogs were not found, would you like to fallback to qlogs for those segments? (y/n) ").lower() != "y":
+      if input(f"{missing_rlogs}/{len(rlog_paths)} rlogs were not found, would you like to fallback to qlogs for those segments? (y/n) ").lower() != "y":
         return rlog_paths
     else:
-      cloudlog.warning(f"{missing_rlogs} rlogs were not found, falling back to qlogs for those segments...")
+      cloudlog.warning(f"{missing_rlogs}/{len(rlog_paths)} rlogs were not found, falling back to qlogs for those segments...")
 
     return [rlog if valid_file(rlog) else (qlog if valid_file(qlog) else None)
             for (rlog, qlog) in zip(rlog_paths, qlog_paths, strict=True)]
@@ -140,6 +140,7 @@ def internal_source(sr: SegmentRange, mode: ReadMode, file_ext: str = "bz2") -> 
   def get_internal_url(sr: SegmentRange, seg, file):
     return f"cd:/{sr.dongle_id}/{sr.log_id}/{seg}/{file}.{file_ext}"
 
+  # TODO: list instead of using static URLs to support routes with multiple file extensions
   rlog_paths = [get_internal_url(sr, seg, "rlog") for seg in sr.seg_idxs]
   qlog_paths = [get_internal_url(sr, seg, "qlog") for seg in sr.seg_idxs]
 
